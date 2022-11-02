@@ -1,0 +1,115 @@
+# Ponteiros para posições importantes: ponto de 
+# referência e início do array de pontos
+add t0, x0, gp   # Ponto de referência
+add t6, x0, gp   # Início do array de pontos
+addi t6, x0, 8
+
+addi t1, x0, 3   # Total de vizinhos
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+# Ponto de referência
+addi t1, x0, 2
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 6
+
+# === ADIÇÃO DOS PONTOS VIZINHOS ===
+# Ponto (0,0) do tipo 1
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 2
+
+# Ponto (0,1) do tipo 2
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 2
+sw   t1, 0(t0)
+addi t0, t0, 2
+
+# Ponto (1,0) do tipo 1
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+# Ponto (2,0) do tipo 1
+addi t1, x0, 2
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+# Ponto (3,0) do tipo 1
+addi t1, x0, 3
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 1
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+# Ponto (0,2) do tipo 2
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 2
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 2
+sw   t1, 0(t0)
+addi t0, t0, 2
+
+# Ponto (0,3) do tipo 2
+addi t1, x0, 0
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 3
+sw   t1, 0(t0)
+addi t0, t0, 1
+
+addi t1, x0, 2
+sw   t1, 0(t0)
+addi t0, t0, 2
+
+# Condição de parada: -1
+addi t1, x0, -1
+sw   t1, 0(t0)
+addi t0, t0, 5
