@@ -1,8 +1,37 @@
+CALCULA_DISTANCIAS: add  t6, x0, gp   # Início do array de pontos
+			 		addi t6, x0, 8
+             
+             		addi a1, x0, -1
+             
+             		lw a0, 0(t6)
+                    
+                    beq a0, a1, FIM_DISTANCIAS
+						
+                        
+                        
+
+BUSCA_MENOR: add  t6, x0, gp   # Início do array de pontos
+			 addi t6, x0, 8
+             
+             addi a1, x0, -1
+             
+             lw a0, 0(t6)
+             
+             add t2, x0, a0
+             lw  t3, 0(t6)
+             lw  t4, 0(t6)
+             
+             beq a0, a1, FIM
+			     
+
+FIM: jal FINAl_FUNCAO
+
 # Ponteiros para posições importantes: ponto de 
 # referência e início do array de pontos
 add t0, x0, gp   # Ponto de referência
 add t6, x0, gp   # Início do array de pontos
 addi t6, x0, 8
+addi t5, x0, 0
 
 addi t1, x0, 3   # Total de vizinhos
 sw   t1, 0(t0)
@@ -113,3 +142,20 @@ addi t0, t0, 2
 addi t1, x0, -1
 sw   t1, 0(t0)
 addi t0, t0, 5
+
+# FIM DA ADIÇÃO DOS PONTOS VIZINHOS
+
+# BUSCA PELO MENOR DOS VIZINHOS
+jal CALCULA_DISTANCIAS
+FIM_DISTANCIAS:
+
+jal BUSCA_MENOR
+FINAL_FUNCAO: 
+lw t1, gp
+blt t5, t1, FIM_CODIGO
+addi, t5, t5, 1
+jal BUSCA_MENOR
+
+FIM_CODIGO:
+
+# FIM DA BUSCA PELOS MENORES VIZINHOS
