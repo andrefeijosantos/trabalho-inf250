@@ -41,7 +41,8 @@ srli t2, t2, 4
 srli t1, t2, 4
 
 # Corrige para ter o bit implícito se ele for maior que 1
-LOOP_BGE: bge  t1, 2, LOOP_BLE
+addi s0, x0, 2
+LOOP_BGE: bge  t1, s0, LOOP_BLE
 	srli t2, t2, 1
 	srli t1, t2, 4
 	addi t6, t6, 1
@@ -49,7 +50,8 @@ LOOP_BGE: bge  t1, 2, LOOP_BLE
 	jal LOOP_BGE
 
 # Corrige para ter o bit implícito se ele for menor que 1
-LOOP_BLE: ble, t1, 0, FIM
+addi s0, x0, 0
+LOOP_BLE: ble, t1, s0, FIM
 	slli t2, t2, 1
 	srli t1, t2, 4
 	addi t6, t6, -1
@@ -64,4 +66,3 @@ FIM: andi t2, t2, 0b01111
 # === JUNÇÃO DA MANTISSA COM EXPOENTE ===
 slli t6, t6, 4
 or   t2, t6, t2
-
