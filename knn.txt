@@ -1,14 +1,38 @@
-CALCULA_DISTANCIAS: add  t6, x0, gp   # Início do array de pontos
-			 		addi t6, x0, 8
-             
-             		addi a1, x0, -1
-             
-             		lw a0, 0(t6)
+CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
                     
-                    beq a0, a1, FIM_DISTANCIAS
-						
+                    lw   a0, 1(t6)
+                    lw   a1, 2(t6)
+
+			 		addi t6, t6, 8    # Início do array de pontos
+             		addi a1, x0, -1   # Variável auxiliar
+             
+             		lw a2, 0(t6)
+                    lw a3, 1(t6)
+                    
+                    beq a2, a1, FIM_DISTANCIAS
+						add a4, x0, a0
+                        add a5, x0, a1
                         
+                        # Calcula as diferencias de x e y
+                        sub a4, a4, a2
+                        sub a5, a5, a3
                         
+                        # Realiza a operação de módulo
+                        srai t3, a4, 31
+                        srai t4, a5, 31
+                        
+                        sub a4, a4, t3
+                        sub a5, a5, t4
+                        
+                        # Soma as coordenadas
+                        add a4, a4, a5
+                        
+                        addi t6, t6, 2
+                        sw   a5, 0(t6)            
+                        addi t6, t6, 1
+                        
+                        lw a2, 0(t6)
+                        lw a3, 1(t6)
 
 BUSCA_MENOR: add  t6, x0, gp   # Início do array de pontos
 			 addi t6, x0, 8
