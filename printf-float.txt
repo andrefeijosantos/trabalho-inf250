@@ -1,0 +1,48 @@
+# ===================================== PSEUDO-CÓDIGO =====================================
+# 1) Encontrar os expoentes (últimos 3 bits) e mantissa (primeiros 4 bits) do número:
+#    "Cortar os números usando shift's e operações lógicas";
+# 2) Normalizar o expoente pela fórmula: (ea + eb - 3);
+# 3) Considerar o bit implícito nas mantissas e multiplicá-las.
+# 4) Operar o resultado para que esteja na forma: 1 XXXX, onde cada X é um bit da mantissa.:
+#    Se este -> 1 <- XXXX bit for diferente de 1, fazer shifts até que seja corrigido.
+# 5) Concatenar expoente com mantissa. 
+# ==========================================================================================
+
+
+
+# Posição que começaremos a escrever
+add  t6, x0, gp  # Ponteiro para onde salvaremos cada caractere
+addi t5, x0, 50  # Nossa "string"
+addi t4, x0, 94  # Caracteres como ^ e *
+
+# Valor para apresentar
+addi t0, x0, 56
+
+# Encontra o expoente
+srli t1, t0, 4
+addi t1, t1, -3
+
+# Encontra a mantissa
+andi t2, t0, 0b0001111
+
+# === CONCATENA E ESCREVE 2 ^ e ===
+# Concatena o '2' com o '^'
+slli t5, t5, 8
+or   t5, t5, t4
+
+# Concatena o "2^" com "+" ou "-"
+slli t5, t5, 8
+addi, t4, x0, 43
+bge t1, -1, FIM
+	mul t1, t1, -1
+	addi, t4, x0, 45
+
+FIM:
+# Concatena "2^+-" com o expoente
+slli t5, t5, 8
+addi t1, t1, 48
+or   t5, t5, t1
+
+# Salva a string gerada
+sw   t5, 0(t6)
+addi t6, t6, 4

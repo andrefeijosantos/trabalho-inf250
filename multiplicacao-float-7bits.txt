@@ -1,0 +1,67 @@
+# ===================================== PSEUDO-CÓDIGO =====================================
+# 1) Encontrar os expoentes (últimos 3 bits) e mantissa (primeiros 4 bits) do número:
+#    "Cortar os números usando shift's e operações lógicas";
+# 2) Normalizar o expoente pela fórmula: (ea + eb - 3);
+# 3) Considerar o bit implícito nas mantissas e multiplicá-las.
+# 4) Operar o resultado para que esteja na forma: 1 XXXX, onde cada X é um bit da mantissa.:
+#    Se este -> 1 <- XXXX bit for diferente de 1, fazer shifts até que seja corrigido.
+# 5) Concatenar expoente com mantissa. 
+# ==========================================================================================
+
+
+# Valores para multiplicar
+addi t0, x0, 56
+addi t1, x0, 70
+
+# Encontra os expoentes
+srli t2, t0, 4
+srli t3, t1, 4
+
+# Encontra as mantissas
+andi t4, t0, 0b0001111
+andi t5, t1, 0b0001111
+
+# === NORMALIZAÇÃO DOS EXPOENTES ===
+# Calcula o expoente do resultado.
+add  t6, t2, t3
+addi t6, t6, -3
+
+# === FIM DA NORMALIZAÇÃO DOS EXPOENTES ===
+
+# === MULTIPLICAÇÃO DAS MANTISSAS === 
+# Adicionar o bit implícito.
+ori t4, t4, 0b10000
+ori t5, t5, 0b10000
+
+# Multiplica e ignora as posições -5, -6, -7 e -8.
+mul  t2, t4, t5
+srli t2, t2, 4
+
+# t1 recebe o bit implícito
+srli t1, t2, 4
+
+# Corrige para ter o bit implícito se ele for maior que 1
+LOOP_BGE: bge  t1, 2, LOOP_BLE
+	srli t2, t2, 1
+	srli t1, t2, 4
+	addi t6, t6, 1
+
+	jal LOOP_BGE
+
+# Corrige para ter o bit implícito se ele for menor que 1
+LOOP_BLE: ble, t1, 0, FIM
+	slli t2, t2, 1
+	srli t1, t2, 4
+	addi t6, t6, -1
+
+	jal FIM
+	
+# Ignora o bit implícito
+FIM: andi t2, t2, 0b01111
+  
+# === FIM DA MULTIPLICAÇÃO DAS MANTISSAS === 
+
+# === JUNÇÃO DA MANTISSA COM EXPOENTE ===
+slli t6, t6, 4
+or   t2, t6, t2
+
