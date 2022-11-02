@@ -160,7 +160,7 @@ CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
                     # Enquanto o X daquela linha nao for -1, calcula a distância e vai pro 
                     # próximo ponto. 
                     # Uma espécie de loop do while().
-                    beq a2, s11, FIM_DISTANCIAS
+                    DO_WHILE: beq a2, s11, FIM_DISTANCIAS
 						add a4, x0, a0
                         add a5, x0, a1
                         
@@ -179,7 +179,10 @@ CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
                         add a4, a4, a5
                         
                         # Salva a diferença
-                        sw   a5, 3(t6)            
+                        slli a4, a4, 24
+                        or   a4, a4, s10
+                        
+                        sw   a4, 0(t6)            
                         addi t6, t6, 4
                         
                         # Carrega os próximos pontos
@@ -189,6 +192,8 @@ CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
  
  						srli a3, s10, 8
                     	andi a3, a3, 0b11111111
+                        
+                        jal DO_WHILE
 
 
 # === FUNÇÃO PARA BUSCAR A MENOR DAS DISTÂNCIAS ===
