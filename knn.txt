@@ -136,19 +136,29 @@ FIM_CODIGO:
 
 
 CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
-
-                    addi t6, t6, 1
-                    lw   a0, 0(t6)
+                    
+ 					# Armazena em a0 e a1 os valores de X e Y do ponto de referência.
+                    lw   s10, 0(t6)
+                    
+ 					srli a0, s10, 8
+                    andi a0, a0, 0b11111111
  
-                    addi t6, t6, 1
-                    lw   a1, 0(t6)
+ 					srli a1, s10, 16
+                    andi a1, a1, 0b11111111
 
-			 		addi t6, t6, 6    # Início do array de pontos
+			 		addi t6, t6, 8     # Início do array de pontos
              		addi s11, x0, -1   # Variável auxiliar
              
-             		lw a2, 0(t6)
-                    lw a3, 1(t6)
+ 					# Armazena em a2 e a3 os valores de X e Y dos pontos vizinhos.
+                    lw   s10, 0(t6)
                     
+                    andi a2, a2, 0b11111111
+ 
+ 					srli a3, s10, 8
+                    andi a3, a3, 0b11111111
+                    
+                    # Enquanto o X daquela linha nao for -1, calcula a distância e vai pro 
+                    # próximo ponto. 
                     beq a2, s11, FIM_DISTANCIAS
 						add a4, x0, a0
                         add a5, x0, a1
