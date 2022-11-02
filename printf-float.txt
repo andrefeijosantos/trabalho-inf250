@@ -21,37 +21,41 @@ addi t4, x0, 94  # Caracteres como ^ e *
 addi a0, x0, -1  # Variável auxiliar
 
 # Valor para apresentar
-addi t0, x0, 56
+addi t0, x0, 0b1001100
 
 # Encontra o expoente
 srli t1, t0, 4
 addi t1, t1, -3
+addi t1, t1, 48
 
 # Encontra a mantissa
 andi t2, t0, 0b0001111
 
 # === CONCATENA E ESCREVE 2 ^ e ===
-# Concatena o '2' com o '^'
-slli t5, t5, 8
-or   t5, t5, t4
-
 # Concatena o "2^" com "+" ou "-"
-slli t5, t5, 8
+slli t1, t1, 24
+sw   t1, 0(t6)
 addi, t4, x0, 43
-bge t1, a0, FIM
+bgt t1, a0, FIM
 	mul t1, t1, a0
 	addi, t4, x0, 45
 
-FIM: or t5, t5, t4
+FIM: slli, t4, t4, 16 
+or t1, t1, t4
 
 # Concatena "2^+-" com o expoente
-slli t5, t5, 8
-addi t1, t1, 48
-or   t5, t5, t1
+addi t4, x0, 94
+slli t4, t4, 8
+or   t1, t4, t1
+
+# Concatena o '2' com o '^'
+or   t1, t5, t1
 
 # Salva a string gerada
-sw   t5, 0(t6)
+sw   t1, 0(t6)
 addi t6, t6, -4
+
+
 
 # === CONCATENA E ESCREVE * 1.X ===
 # Para a substring "1."
@@ -63,10 +67,34 @@ addi t6, t6, -4
 addi t4, x0, 46  # Ponto flutuante
 addi t5, x0, 49  # Nossa segunda "string"
 
-slli t5, t5, 8
+slli t4, t4, 8
 or   t5, t5, t4
 
 sw   t5, 0(t6)
 
 # Para a substring "XXXX", isto é, os valores de ponto
 # flutuante da mantissa:
+addi a0, x0, 625
+addi a1, x0, 1250
+slli a2, a1, 1
+slli a3, a2, 1
+
+andi a4, t2, 0b0001
+
+andi a5, t2, 0b0010
+srli a5, a5, 1
+
+andi a6, t2, 0b0100
+srli a6, a6, 2
+
+andi t0, t2, 0b1000
+srli t0, t0, 3
+
+mul a0, a0, a4
+mul a1, a1, a5
+mul a2, a2, a6
+mul a3, a3, t0
+
+add a3, a3, a2
+add a3, a3, a1
+add a3, a3, a0
