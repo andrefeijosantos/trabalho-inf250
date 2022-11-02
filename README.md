@@ -1,5 +1,5 @@
 # Trabalho INF250
 ### André Feijó - ES105466 
-### Nastascha Palhares - 
+### Nastascha Palhares - ES105460
 ### Pedro Fiorio - 
 ### Rafael Zardo - 105468
