@@ -1,11 +1,15 @@
 # ===================================== PSEUDO-CÓDIGO =====================================
 # 1) Encontrar os expoentes (últimos 3 bits) e mantissa (primeiros 4 bits) do número:
 #    "Cortar os números usando shift's e operações lógicas";
-# 2) Normalizar o expoente pela fórmula: (ea + eb - 3);
-# 3) Considerar o bit implícito nas mantissas e multiplicá-las.
-# 4) Operar o resultado para que esteja na forma: 1 XXXX, onde cada X é um bit da mantissa.:
-#    Se este -> 1 <- XXXX bit for diferente de 1, fazer shifts até que seja corrigido.
-# 5) Concatenar expoente com mantissa. 
+# 2) Escrever a string "2 ^ + e" ou "2 ^ - e":
+#    Começar a string com '2';
+#    Dar um shift para a esquerda e adicionar o '^', com operação or;
+#    Dar outro shift e adicionar + ou -, de acordo o sinal do valor;
+#    Finalmente, concatenar o valor de e, que só tem um caractere, afinal, é, no máximo, 7.
+# 3) Escrever a string "1 . XXXX":
+#    Começar a string com '1';
+#    Dar um shift para a esquerda e adicionar o '.', com operação or;
+#    
 # ==========================================================================================
 
 
@@ -14,6 +18,7 @@
 add  t6, x0, gp  # Ponteiro para onde salvaremos cada caractere
 addi t5, x0, 50  # Nossa "string"
 addi t4, x0, 94  # Caracteres como ^ e *
+addi a0, x0, -1  # Variável auxiliar
 
 # Valor para apresentar
 addi t0, x0, 56
@@ -33,11 +38,12 @@ or   t5, t5, t4
 # Concatena o "2^" com "+" ou "-"
 slli t5, t5, 8
 addi, t4, x0, 43
-bge t1, -1, FIM
-	mul t1, t1, -1
+bge t1, a0, FIM
+	mul t1, t1, a0
 	addi, t4, x0, 45
 
-FIM:
+FIM: or t5, t5, t4
+
 # Concatena "2^+-" com o expoente
 slli t5, t5, 8
 addi t1, t1, 48
@@ -45,4 +51,22 @@ or   t5, t5, t1
 
 # Salva a string gerada
 sw   t5, 0(t6)
-addi t6, t6, 4
+addi t6, t6, -4
+
+# === CONCATENA E ESCREVE * 1.X ===
+# Para a substring "1."
+addi t4, x0, 42
+sw   t4, 0(t6)
+
+addi t6, t6, -4
+
+addi t4, x0, 46  # Ponto flutuante
+addi t5, x0, 49  # Nossa segunda "string"
+
+slli t5, t5, 8
+or   t5, t5, t4
+
+sw   t5, 0(t6)
+
+# Para a substring "XXXX", isto é, os valores de ponto
+# flutuante da mantissa:
