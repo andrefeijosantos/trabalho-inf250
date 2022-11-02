@@ -70,8 +70,6 @@ addi t5, x0, 49  # Nossa segunda "string"
 slli t4, t4, 8
 or   t5, t5, t4
 
-sw   t5, 0(t6)
-
 # Para a substring "XXXX", isto é, os valores de ponto
 # flutuante da mantissa:
 addi a0, x0, 625
@@ -98,3 +96,65 @@ mul a3, a3, t0
 add a3, a3, a2
 add a3, a3, a1
 add a3, a3, a0
+
+addi, t0, x0, -1
+addi, a0, x0, 1000
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+slli a1, a1, 16
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+# Segunda caractere da mantissa
+addi, a0, x0, 100
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+slli a1, a1, 24
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+sw   t5, 0(t6)
+addi t6, t6, -4
+
+# Terceiro caractere da mantissa
+addi t5, x0, 0
+
+addi, a0, x0, 10
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+add t5, t5, a3
+
+# Último caractere da mantissa
+addi, a0, x0, 1
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+slli a1, a1, 8
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+add t5, t5, a3
+
+sw   t5, 0(t6)
