@@ -3,7 +3,7 @@
 add t0, x0, gp   # Ponto de referência
 add t6, x0, gp   # Início do array de pontos
 addi t6, x0, 8
-addi t5, x0, 0
+addi t5, x0, 1
 
 addi t1, x0, 3   # Total de vizinhos
 sw   t1, 0(t0)
@@ -113,22 +113,28 @@ addi t0, t0, 2
 # Condição de parada: -1
 addi t1, x0, -1
 sw   t1, 0(t0)
-addi t0, t0, 5
+add  s1, x0, t0 # Guarda a última posicao
+add  s0, x0, t0
+addi  s0, s0, 8
 
 # FIM DA ADIÇÃO DOS PONTOS VIZINHOS
 
 # BUSCA PELO MENOR DOS VIZINHOS
+lw t1, 0(gp)
+andi t1, t1, 0b11111111
+
 jal CALCULA_DISTANCIAS
 FIM_DISTANCIAS:
 
 jal BUSCA_MENOR
 FINAL_FUNCAO: 
-lw t1, 0(gp)
-blt t5, t1, FIM_CODIGO
+
+bge t5, t1, MAIS_FREQUENTE
 addi, t5, t5, 1
 jal BUSCA_MENOR
 
-FIM_CODIGO:
+MAIS_FREQUENTE:jal GRUPO_MAIS_FREQUENTE
+jal FIM_CODIGO
 
 # FIM DA BUSCA PELOS MENORES VIZINHOS
 
@@ -137,31 +143,31 @@ FIM_CODIGO:
 # === FUNÇÃO PARA CALCULAR AS DISTÂNCIAS ===
 CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
                     
- 					# Armazena em a0 e a1 os valores de X e Y do ponto de referência.
-                    lw   s10, 0(t6)
+ 		     # Armazena em a0 e a1 os valores de X e Y do ponto de referência.
+             lw   s10, 0(t6)
                     
- 					srli a0, s10, 8
-                    andi a0, a0, 0b11111111
+ 		     srli a0, s10, 8
+             andi a0, a0, 0b11111111
  
- 					srli a1, s10, 16
-                    andi a1, a1, 0b11111111
+ 		     srli a1, s10, 16
+             andi a1, a1, 0b11111111
 
-			 		addi t6, t6, 8     # Início do array de pontos
-             		addi s11, x0, -1   # Variável auxiliar
+		     addi t6, t6, 8     # Início do array de pontos
+             lw s11, 0(s1)      # Variável auxiliar
              
- 					# Armazena em a2 e a3 os valores de X e Y dos pontos vizinhos.
-                    lw   s10, 0(t6)
+ 		     # Armazena em a2 e a3 os valores de X e Y dos pontos vizinhos.
+             lw   s10, 0(t6)
                     
-                    andi a2, a2, 0b11111111
+             andi a2, s10, 0b11111111
  
- 					srli a3, s10, 8
-                    andi a3, a3, 0b11111111
+ 		     srli a3, s10, 8
+             andi a3, a3, 0b11111111
                     
-                    # Enquanto o X daquela linha nao for -1, calcula a distância e vai pro 
-                    # próximo ponto. 
-                    # Uma espécie de loop do while().
-                    DO_WHILE: beq a2, s11, FIM_DISTANCIAS
-						add a4, x0, a0
+             # Enquanto o X daquela linha nao for -1, calcula a distância e vai pro 
+             # próximo ponto. 
+             # Uma espécie de loop do while().
+             DO_WHILE: beq s10, s11, FIM_DISTANCIAS
+			            add a4, x0, a0
                         add a5, x0, a1
                         
                         # Calcula as diferenças de x e y
@@ -171,6 +177,9 @@ CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
                         # Realiza a operação de módulo
                         srai t3, a4, 31
                         srai t4, a5, 31
+                        
+                        xor a4, a4, t3
+                        xor a5, a5, t4
                         
                         sub a4, a4, t3
                         sub a5, a5, t4
@@ -188,28 +197,94 @@ CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
                         # Carrega os próximos pontos
                     	lw   s10, 0(t6)
                     
-                    	andi a2, a2, 0b11111111
+                    	andi a2, s10, 0b11111111
  
- 						srli a3, s10, 8
+ 			            srli a3, s10, 8
                     	andi a3, a3, 0b11111111
-                        
+                          
                         jal DO_WHILE
 
 
 # === FUNÇÃO PARA BUSCAR A MENOR DAS DISTÂNCIAS ===
 # Busca a menor distância, salva em outra posição e exclui do array.
 BUSCA_MENOR: add  t6, x0, gp   # Início do array de pontos
-			 addi t6, x0, 8
+	         addi t6, t6, 8
+	         add  s8, x0, t6   # Aponta para a melhor posição
              
-             addi a1, x0, -1
+             lw s11, 0(s1)      # Variável auxiliar
              
-             lw a0, 0(t6)
+             # Obtém a distância do primeiro ponto.
+             lw   s10, 0(t6)
              
-             add t2, x0, a0
-             lw  t3, 0(t6)
-             lw  t4, 0(t6)
+             srli a0, s10, 24
+             add  s7, x0, a0   # Guarda menor distancia.
              
-             beq a0, a1, FIM
-			     
+             addi t6, t6, 4
+             lw   s10, 0(t6)
+             
+             # Encontra a menor distância.
+             DO_WHILE_BUSCA: beq s10, s11, FIM
+             		         srli a0, s10, 24
+             		      
+                          	 addi, s2, x0, 0
+                          	 blt a0, s2, MAIOR
+             		         bge a0, s7, MAIOR
+             		             add s7, x0, a0    
+             		  	         add s8, x0, t6
+             		     
+             		     
+             		         MAIOR: addi t6, t6, 4
+                             lw   s10, 0(t6)
+                             
+             		         jal DO_WHILE_BUSCA
+             		     
+            # Copia o ponto mais próximo para a posição apontada por s0.
+	        FIM: lw   s10, 0(s8)
+	        sw   s10, 0(s0)
+	        addi s0, s0, 4
+	    
+	        # Copia o ponto imediatamente após o mais próximo para a sua posição
+            addi a0, x0, 0b011111111111
+            slli a0, a0, 20
+            ori a0, a0, 0b11111111111
+            slli a0, a0, 8
+            ori a0, a0, 0b111111111
+            
+	        sw a0, 0(s8)  
 
-FIM: jal FINAL_FUNCAO
+            jal FINAL_FUNCAO
+           
+            
+ GRUPO_MAIS_FREQUENTE: add  t6, x0, s1   # Início do array de pontos mais próximos.
+             addi t6, t6, 8
+             
+             addi s7, x0, 0    # Contador do grupo 1
+             addi s9, x0, 0    # Contador do grupo 2
+             addi s11, x0, 1   # Variável auxiliar
+             
+             WHILE_FREQUENCIA: beq t6, s0, FIM_WHILE
+                               lw s10, 0(t6)
+                               srli s10, s10, 16
+                               andi s10, s10, 0b111111111
+                               
+                               beq s10, s11, GRUPO_UM
+                               addi s9, s9, 1
+                               jal FIM_IF
+                               
+                               GRUPO_UM: addi s7, s7, 1
+                            
+                               FIM_IF: addi t6, t6, 4
+                               			jal WHILE_FREQUENCIA
+              FIM_WHILE: 
+              
+              ble s7, s9, GRUPO_DOIS_MAIOR
+              			  sw s11, 0(t6)
+                          jal FIM_CODIGO
+              
+              GRUPO_DOIS_MAIOR: addi s11, x0, 2
+                                sw s11, 0(t6)
+                                jal FIM_CODIGO
+                                        
+
+ # === FIM DAS FUNÇÕES AUXILIARES ===
+ FIM_CODIGO:
