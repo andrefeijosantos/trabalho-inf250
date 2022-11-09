@@ -21,11 +21,12 @@ addi t4, x0, 94  # Caracteres como ^ e *
 addi a0, x0, -1  # Variável auxiliar
 
 # Valor para apresentar
-addi t0, x0, 0b0101100
+addi t0, x0, 0b0111100
 
 # Encontra o expoente
 srli t1, t0, 4
 addi t1, t1, -3
+add s8, x0, t1
 addi t1, t1, 48
 
 # Encontra a mantissa
@@ -36,8 +37,9 @@ andi t2, t0, 0b0001111
 slli t1, t1, 24
 sw   t1, 0(t6)
 addi, t4, x0, 43
-bgt t1, a0, FIM
+bgt s8, a0, FIM
 	mul t1, t1, a0
+    mul s8, s8, a0
 	addi, t4, x0, 45
 
 FIM: slli, t4, t4, 16 
@@ -53,6 +55,8 @@ or   t1, t5, t1
 
 # Salva a string gerada
 sw   t1, 0(t6)
+addi s8, s8, 48
+sw   s8, 3(t6)
 addi t6, t6, -4
 
 
