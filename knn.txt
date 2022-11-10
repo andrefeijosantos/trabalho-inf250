@@ -1,3 +1,24 @@
+
+# ===================================== PSEUDO-CÓDIGO =====================================
+# 1) Popula a memória com os dados dos pntos. Aqui, guardaremos eles da seguinte forma:
+#
+#    +0 +1    +2                 +3
+#     x  y  classe distância do ponto de referência
+# 
+#    De tal forma que cada valor deste caiba em uma repartição de 8bits de cada posição da
+#    memória. Isso ajudará a manter a organização;
+# 2) Varremos cada posição da memória, pegando os slots +0 e +1 para calcular as distâncias
+#    de cada ponto ao ponto de referência e salvá-lo no slot +3;
+# 3) Varremos, novamente cada posição da memória, desta vez k vezes e buscando, cada vez, 
+#    pela menor distância. Depois, salvamos-a após a posição -1 -1 -1 -1, que indica o final
+#    do array e colocamos um número negativo na distância deste ponto no array (Assim, con-
+#    seguimos não escolher aquele ponto como menor novamente e não precisamos "descer" todas
+#    as próximas posições;
+# 4) Por fim, calculamos qual grupo aparece mais dentro desde array de pontos mais próximos:
+#    se é o 1 ou o 2
+#    
+# ==========================================================================================
+
 # Ponteiros para posições importantes: ponto de 
 # referência e início do array de pontos
 add t0, x0, gp   # Ponto de referência
