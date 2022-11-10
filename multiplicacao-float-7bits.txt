@@ -37,12 +37,12 @@ ori t5, t5, 0b10000
 mul  t2, t4, t5
 srli t2, t2, 4
 
-# t1 recebe o bit implícito
+# t1 recebe o bit implícito que está em t2.
 srli t1, t2, 4
 
 # Corrige para ter o bit implícito se ele for maior que 1
 addi s0, x0, 2
-LOOP_BGE: bge  t1, s0, LOOP_BLE
+LOOP_BGE: blt  t1, s0, LOOP_BLE
 	srli t2, t2, 1
 	srli t1, t2, 4
 	addi t6, t6, 1
