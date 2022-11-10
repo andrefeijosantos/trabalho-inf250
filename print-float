@@ -1,311 +1,161 @@
-
 # ===================================== PSEUDO-CÓDIGO =====================================
-# 1) Popula a memória com os dados dos pntos. Aqui, guardaremos eles da seguinte forma:
-#
-#    +0 +1    +2                 +3
-#     x  y  classe distância do ponto de referência
-# 
-#    De tal forma que cada valor deste caiba em uma repartição de 8bits de cada posição da
-#    memória. Isso ajudará a manter a organização;
-# 2) Varremos cada posição da memória, pegando os slots +0 e +1 para calcular as distâncias
-#    de cada ponto ao ponto de referência e salvá-lo no slot +3;
-# 3) Varremos, novamente cada posição da memória, desta vez k vezes e buscando, cada vez, 
-#    pela menor distância. Depois, salvamos-a após a posição -1 -1 -1 -1, que indica o final
-#    do array e colocamos um número negativo na distância deste ponto no array (Assim, con-
-#    seguimos não escolher aquele ponto como menor novamente e não precisamos "descer" todas
-#    as próximas posições;
-# 4) Por fim, calculamos qual grupo aparece mais dentro desde array de pontos mais próximos:
-#    se é o 1 ou o 2
+# 1) Encontrar os expoentes (últimos 3 bits) e mantissa (primeiros 4 bits) do número:
+#    "Cortar os números usando shift's e operações lógicas";
+# 2) Escrever a string "2 ^ + e" ou "2 ^ - e":
+#    Começar a string com '2';
+#    Dar um shift para a esquerda e adicionar o '^', com operação or;
+#    Dar outro shift e adicionar + ou -, de acordo o sinal do valor;
+#    Finalmente, concatenar o valor de e, que só tem um caractere, afinal, é, no máximo, 7.
+# 3) Escrever a string "1 . XXXX":
+#    Começar a string com '1';
+#    Dar um shift para a esquerda e adicionar o '.', com operação or;
 #    
 # ==========================================================================================
 
-# Ponteiros para posições importantes: ponto de 
-# referência e início do array de pontos
-add t0, x0, gp   # Ponto de referência
-add t6, x0, gp   # Início do array de pontos
-addi t6, x0, 8
-addi t5, x0, 1
 
-addi t1, x0, 3   # Total de vizinhos
-sw   t1, 0(t0)
-addi t0, t0, 1
 
-# Ponto de referência
-addi t1, x0, 2
-sw   t1, 0(t0)
-addi t0, t0, 1
+# Posição que começaremos a escrever
+add  t6, x0, gp  # Ponteiro para onde salvaremos cada caractere
+addi t5, x0, 50  # Nossa "string"
+addi t4, x0, 94  # Caracteres como ^ e *
+addi a0, x0, -1  # Variável auxiliar
 
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 6
+# Valor para apresentar
+addi t0, x0, 0b1000111
 
-# === ADIÇÃO DOS PONTOS VIZINHOS ===
-# Ponto (0,0) do tipo 1
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
+# Encontra o expoente
+srli t1, t0, 4
+addi t1, t1, -3
+add s8, x0, t1
+addi t1, t1, 48
 
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
+# Encontra a mantissa
+andi t2, t0, 0b0001111
 
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 2
+# === CONCATENA E ESCREVE 2 ^ e ===
+# Concatena o "2^" com "+" ou "-"
+slli t1, t1, 24
+sw   t1, 0(t6)
+addi, t4, x0, 43
+bgt s8, a0, FIM
+	mul t1, t1, a0
+    mul s8, s8, a0
+	addi, t4, x0, 45
 
-# Ponto (0,1) do tipo 2
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
+FIM: slli, t4, t4, 16 
+or t1, t1, t4
 
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 1
+# Concatena "2^+-" com o expoente
+addi t4, x0, 94
+slli t4, t4, 8
+or   t1, t4, t1
 
-addi t1, x0, 2
-sw   t1, 0(t0)
-addi t0, t0, 2
+# Concatena o '2' com o '^'
+or   t1, t5, t1
 
-# Ponto (1,0) do tipo 1
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 2
-
-# Ponto (2,0) do tipo 1
-addi t1, x0, 2
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 2
-
-# Ponto (3,0) do tipo 1
-addi t1, x0, 3
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 1
-sw   t1, 0(t0)
-addi t0, t0, 2
-
-# Ponto (0,2) do tipo 2
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 2
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 2
-sw   t1, 0(t0)
-addi t0, t0, 2
-
-# Ponto (0,3) do tipo 2
-addi t1, x0, 0
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 3
-sw   t1, 0(t0)
-addi t0, t0, 1
-
-addi t1, x0, 2
-sw   t1, 0(t0)
-addi t0, t0, 2
-
-# Condição de parada: -1
-addi t1, x0, -1
-sw   t1, 0(t0)
-add  s1, x0, t0 # Guarda a última posicao
-add  s0, x0, t0
-addi  s0, s0, 8
-
-# FIM DA ADIÇÃO DOS PONTOS VIZINHOS
-
-# BUSCA PELO MENOR DOS VIZINHOS
-lw t1, 0(gp)
-andi t1, t1, 0b11111111
-
-jal CALCULA_DISTANCIAS
-FIM_DISTANCIAS:
-
-jal BUSCA_MENOR
-FINAL_FUNCAO: 
-
-bge t5, t1, MAIS_FREQUENTE
-addi, t5, t5, 1
-jal BUSCA_MENOR
-
-MAIS_FREQUENTE:jal GRUPO_MAIS_FREQUENTE
-jal FIM_CODIGO
-
-# FIM DA BUSCA PELOS MENORES VIZINHOS
+# Salva a string gerada
+sw   t1, 0(t6)
+addi s8, s8, 48
+sw   s8, 3(t6)
+addi t6, t6, -4
 
 
 
-# === FUNÇÃO PARA CALCULAR AS DISTÂNCIAS ===
-CALCULA_DISTANCIAS: add  t6, x0, gp   # Posição inicial dos valores
-                    
- 		     # Armazena em a0 e a1 os valores de X e Y do ponto de referência.
-             lw   s10, 0(t6)
-                    
- 		     srli a0, s10, 8
-             andi a0, a0, 0b11111111
- 
- 		     srli a1, s10, 16
-             andi a1, a1, 0b11111111
+# === CONCATENA E ESCREVE * 1.X ===
+# Para a substring "1."
+addi t4, x0, 42
+sw   t4, 0(t6)
 
-		     addi t6, t6, 8     # Início do array de pontos
-             lw s11, 0(s1)      # Variável auxiliar
-             
- 		     # Armazena em a2 e a3 os valores de X e Y dos pontos vizinhos.
-             lw   s10, 0(t6)
-                    
-             andi a2, s10, 0b11111111
- 
- 		     srli a3, s10, 8
-             andi a3, a3, 0b11111111
-                    
-             # Enquanto o X daquela linha nao for -1, calcula a distância e vai pro 
-             # próximo ponto. 
-             # Uma espécie de loop do while().
-             DO_WHILE: beq s10, s11, FIM_DISTANCIAS
-			            add a4, x0, a0
-                        add a5, x0, a1
-                        
-                        # Calcula as diferenças de x e y
-                        sub a4, a4, a2
-                        sub a5, a5, a3
-                        
-                        # Realiza a operação de módulo
-                        srai t3, a4, 31
-                        srai t4, a5, 31
-                        
-                        xor a4, a4, t3
-                        xor a5, a5, t4
-                        
-                        sub a4, a4, t3
-                        sub a5, a5, t4
-                        
-                        # Soma as coordenadas
-                        add a4, a4, a5
-                        
-                        # Salva a diferença
-                        slli a4, a4, 24
-                        or   a4, a4, s10
-                        
-                        sw   a4, 0(t6)            
-                        addi t6, t6, 4
-                        
-                        # Carrega os próximos pontos
-                    	lw   s10, 0(t6)
-                    
-                    	andi a2, s10, 0b11111111
- 
- 			            srli a3, s10, 8
-                    	andi a3, a3, 0b11111111
-                          
-                        jal DO_WHILE
+addi t6, t6, -4
 
+addi t4, x0, 46  # Ponto flutuante
+addi t5, x0, 49  # Nossa segunda "string"
 
-# === FUNÇÃO PARA BUSCAR A MENOR DAS DISTÂNCIAS ===
-# Busca a menor distância, salva em outra posição e exclui do array.
-BUSCA_MENOR: add  t6, x0, gp   # Início do array de pontos
-	         addi t6, t6, 8
-	         add  s8, x0, t6   # Aponta para a melhor posição
-             
-             lw s11, 0(s1)      # Variável auxiliar
-             
-             # Obtém a distância do primeiro ponto.
-             lw   s10, 0(t6)
-             
-             srli a0, s10, 24
-             add  s7, x0, a0   # Guarda menor distancia.
-             
-             addi t6, t6, 4
-             lw   s10, 0(t6)
-             
-             # Encontra a menor distância.
-             DO_WHILE_BUSCA: beq s10, s11, FIM
-             		         srli a0, s10, 24
-             		      
-                          	 addi, s2, x0, 0
-                          	 blt a0, s2, MAIOR
-             		         bge a0, s7, MAIOR
-             		             add s7, x0, a0    
-             		  	         add s8, x0, t6
-             		     
-             		     
-             		         MAIOR: addi t6, t6, 4
-                             lw   s10, 0(t6)
-                             
-             		         jal DO_WHILE_BUSCA
-             		     
-            # Copia o ponto mais próximo para a posição apontada por s0.
-	        FIM: lw   s10, 0(s8)
-	        sw   s10, 0(s0)
-	        addi s0, s0, 4
-	    
-	        # Copia o ponto imediatamente após o mais próximo para a sua posição
-            addi a0, x0, 0b011111111111
-            slli a0, a0, 20
-            ori a0, a0, 0b11111111111
-            slli a0, a0, 8
-            ori a0, a0, 0b111111111
-            
-	        sw a0, 0(s8)  
+slli t4, t4, 8
+or   t5, t5, t4
 
-            jal FINAL_FUNCAO
-           
-            
- GRUPO_MAIS_FREQUENTE: add  t6, x0, s1   # Início do array de pontos mais próximos.
-             addi t6, t6, 8
-             
-             addi s7, x0, 0    # Contador do grupo 1
-             addi s9, x0, 0    # Contador do grupo 2
-             addi s11, x0, 1   # Variável auxiliar
-             
-             WHILE_FREQUENCIA: beq t6, s0, FIM_WHILE
-                               lw s10, 0(t6)
-                               srli s10, s10, 16
-                               andi s10, s10, 0b111111111
-                               
-                               beq s10, s11, GRUPO_UM
-                               addi s9, s9, 1
-                               jal FIM_IF
-                               
-                               GRUPO_UM: addi s7, s7, 1
-                            
-                               FIM_IF: addi t6, t6, 4
-                               			jal WHILE_FREQUENCIA
-              FIM_WHILE: 
-              
-              ble s7, s9, GRUPO_DOIS_MAIOR
-              			  sw s11, 0(t6)
-                          jal FIM_CODIGO
-              
-              GRUPO_DOIS_MAIOR: addi s11, x0, 2
-                                sw s11, 0(t6)
-                                jal FIM_CODIGO
-                                        
+# Para a substring "XXXX", isto é, os valores de ponto
+# flutuante da mantissa:
+addi a0, x0, 625
+addi a1, x0, 1250
+slli a2, a1, 1
+slli a3, a2, 1
 
- # === FIM DAS FUNÇÕES AUXILIARES ===
- FIM_CODIGO:
+andi a4, t2, 0b0001 #Caso haja 1 na ultima pos da mantissa
+
+andi a5, t2, 0b0010
+srli a5, a5, 1
+
+andi a6, t2, 0b0100
+srli a6, a6, 2
+
+andi t0, t2, 0b1000
+srli t0, t0, 3
+
+mul a0, a0, a4 #caso haja 1 na ultima pos, a0 = 625
+mul a1, a1, a5
+mul a2, a2, a6
+mul a3, a3, t0 #caso haja 1 na primeira pos, a3 = 5000
+
+add a3, a3, a2
+add a3, a3, a1
+add a3, a3, a0
+
+addi, t0, x0, -1
+addi, a0, x0, 1000
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+slli a1, a1, 16
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+# Segunda caractere da mantissa
+addi, a0, x0, 100
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+slli a1, a1, 24
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+sw   t5, 0(t6)
+addi t6, t6, -4
+
+# Terceiro caractere da mantissa
+addi t5, x0, 0
+
+addi, a0, x0, 10
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+addi s9, t6, -4
+add s10, x0, t5
+
+# Último caractere da mantissa
+addi, a0, x0, 1
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+add s11, x0, a1
+
+slli s11, s11, 8
+or s11, s11, s10
+
+sw s11, 0(t6)
