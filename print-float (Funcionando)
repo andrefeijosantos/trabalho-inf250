@@ -21,7 +21,7 @@ addi t4, x0, 94  # Caracteres como ^ e *
 addi a0, x0, -1  # Variável auxiliar
 
 # Valor para apresentar
-addi t0, x0, 0b0111100
+addi t0, x0, 0b1000111
 
 # Encontra o expoente
 srli t1, t0, 4
@@ -146,7 +146,6 @@ add a3, a3, a2
 
 addi s9, t6, -4
 add s10, x0, t5
-sw   s10, 0(s9)
 
 # Último caractere da mantissa
 addi, a0, x0, 1
@@ -156,8 +155,7 @@ add a2, x0, a1
 addi, a1, a1 48
 add s11, x0, a1
 
-sw   s11, 1(s9)
-lw s11, 0(s9)
+slli s11, s11, 8
+or s11, s11, s10
+
 sw s11, 0(t6)
-addi s11, x0, 0
-sw   s11, 0(s9)
