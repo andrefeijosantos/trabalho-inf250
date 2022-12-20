@@ -1,0 +1,179 @@
+# ===================================== PSEUDO-CÓDIGO =====================================
+# 1) Encontrar os expoentes (últimos 3 bits) e mantissa (primeiros 4 bits) do número:
+#    "Cortar os números usando shift's e operações lógicas";
+# 2) Escrever a string "2 ^ + e" ou "2 ^ - e":
+#    Começar a string com '2';
+#    Dar um shift para a esquerda e adicionar o '^', com operação or;
+#    Dar outro shift e adicionar + ou -, de acordo o sinal do valor;
+#    Finalmente, concatenar o valor de e, que só tem um caractere, afinal, é, no máximo, 7.
+# 3) Escrever a string "1 . XXXX":
+#    Começar a string com '1';
+#    Dar um shift para a esquerda e adicionar o '.', com operação or;
+#    
+# ==========================================================================================
+
+
+
+# Posição que começaremos a escrever
+add  t6, x0, gp  # Ponteiro para onde salvaremos cada caractere
+addi t5, x0, 50  # Nossa "string"
+addi t4, x0, 94  # Caracteres como ^ e *
+addi a0, x0, 0  # Variável auxiliar
+
+# Valor para apresentar
+addi t0, x0, 0b1000111
+
+# Encontra o expoente
+addi s3, x0, 4
+srl t1, t0, s3
+addi t1, t1, -3
+add s8, x0, t1
+addi t1, t1, 48
+
+# Encontra a mantissa
+addi s3, x0, 0b0001111
+and t2, t0, s3
+
+# === CONCATENA E ESCREVE 2 ^ e ===
+# Concatena o "2^" com "+" ou "-"
+addi s3, x0, 24
+sll t1, t1, s3
+sw   t1, 0(t6)
+addi, t4, x0, 43
+blt a0, s8, FIM
+	mul t1, t1, a0
+    mul s8, s8, a0
+	addi, t4, x0, 45
+
+FIM: 
+addi s3, x0, 16
+sll, t4, t4, s3 
+or t1, t1, t4
+
+# Concatena "2^+-" com o expoente
+addi t4, x0, 94
+addi s3, x0, 8
+sll t4, t4, s3
+or   t1, t4, t1
+
+# Concatena o '2' com o '^'
+or   t1, t5, t1
+
+# Salva a string gerada
+sw   t1, 0(t6)
+addi s8, s8, 48
+sw   s8, 3(t6)
+addi t6, t6, -4
+
+
+
+# === CONCATENA E ESCREVE * 1.X ===
+# Para a substring "1."
+addi t4, x0, 42
+sw   t4, 0(t6)
+
+addi t6, t6, -4
+
+addi t4, x0, 46  # Ponto flutuante
+addi t5, x0, 49  # Nossa segunda "string"
+
+addi s3, x0, 8
+sll t4, t4, s3
+or   t5, t5, t4
+
+# Para a substring "XXXX", isto é, os valores de ponto
+# flutuante da mantissa:
+addi a0, x0, 625
+addi a1, x0, 1250
+addi s3, x0, 1
+sll a2, a1, s3
+sll a3, a2, s3
+
+addi s3, x0, 0b0001
+and a4, t2, s3 #Caso haja 1 na ultima pos da mantissa
+
+addi s3, x0, 0b0010
+and a5, t2, s3
+addi s3, x0, 1
+srl a5, a5, s3
+
+addi s3, x0, 0b0100
+and a6, t2, s3
+addi s3, x0, 2
+srl a6, a6, s3
+
+addi s3, x0, 0b1000
+and t0, t2, s3
+addi s3, x0, 3
+srl t0, t0, s3
+
+mul a0, a0, a4 #caso haja 1 na ultima pos, a0 = 625
+mul a1, a1, a5
+mul a2, a2, a6
+mul a3, a3, t0 #caso haja 1 na primeira pos, a3 = 5000
+
+add a3, a3, a2
+add a3, a3, a1
+add a3, a3, a0
+
+addi, t0, x0, -1
+addi, a0, x0, 1000
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+addi s3, x0, 16
+sll a1, a1, s3
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+# Segunda caractere da mantissa
+addi, a0, x0, 100
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+addi s3, x0, 24
+sll a1, a1, s3
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+sw   t5, 0(t6)
+addi t6, t6, -4
+
+# Terceiro caractere da mantissa
+addi t5, x0, 0
+
+addi, a0, x0, 10
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+or   t5, t5, a1
+
+mul a2, a2, a0
+mul a2, a2, t0
+add a3, a3, a2
+
+addi s9, t6, -4
+add s10, x0, t5
+
+# Último caractere da mantissa
+addi, a0, x0, 1
+
+div a1, a3, a0
+add a2, x0, a1
+addi, a1, a1 48
+add s11, x0, a1
+
+addi s3, x0, 8
+sll s11, s11, s3
+or s11, s11, s10
+
+sw s11, 0(t6)
